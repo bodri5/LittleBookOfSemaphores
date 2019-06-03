@@ -2724,18 +2724,18 @@ Here is Morris's solution.
 mutex.wait()
     room1 += 1            (*\label{room1begin}*)
 mutex.signal()
-                           
+
 t1.wait()                 (*\label{wait1}*)
     room2 += 1            (*\label{room2begin}*)
     mutex.wait()
     room1 -= 1            (*\label{room1end}*)
 
-    if room1 == 0: 
+    if room1 == 0:
         mutex.signal()
-	t2.signal()
-    else: 
+        t2.signal()
+    else:
         mutex.signal()
-	t1.signal()
+        t1.signal()
 
 t2.wait()                  (*\label{wait2}*)
     room2 -= 1             (*\label{room2end}*)
@@ -3282,11 +3282,13 @@ isTobacco = isPaper = isMatch = False
 tobaccoSem = Semaphore(0)
 paperSem = Semaphore(0)
 matchSem = Semaphore(0)
+mutex = Semaphore(1)
 \end{lstlisting}
 
 The boolean variables indicate whether or not an ingredient
 is on the table.  The pushers use {\tt tobaccoSem} to signal
 the smoker with tobacco, and the other semaphores likewise.
+{\tt mutex} protects the boolean variables.
 
 
 \clearemptydoublepage
@@ -3649,11 +3651,11 @@ My solution uses a list of semaphores named {\tt queue}.
 
 \lstinputlisting[title=FIFO barbershop hint]{../code/barber2.py.0}
 
-As each thread passes the turnstile, it creates a thread and puts it
+As each thread passes the turnstile, it creates a semaphore and puts it
 in the queue.
 
 Instead of waiting on {\tt barber}, each thread waits on its own
-semaphore.  When the barber wakes up, he removes a thread from the queue and
+semaphore.  When the barber wakes up, he removes a semaphore from the queue and
 signals it.
 
 
@@ -3751,6 +3753,7 @@ of semaphores for threads waiting for a seat on the sofa.
 
 {\tt mutex2} protects {\tt queue2}, which is a list
 of semaphores for threads waiting for a chair.
+(There in no mutex2!!!!)
 
 {\tt sofa} is a multiplex that enforces the maximum number of customers
 on the sofa.
@@ -3767,7 +3770,7 @@ sigmals that a barber has accepted payment.
 \subsection {Hilzer's barbershop solution}
 
 This solution is considerably more complex than I expected.  I
-am not sure if Hilzer had something simpler in mind, but here is the
+am not if Hilzer had something simpler in mind, but here is the
 best I could do.
 
 \lstinputlisting[title=Hilzer's barbershop solution (customer)]
@@ -3806,7 +3809,7 @@ is unnecessary.
 This solution is in \verb"sync_code/barber3.py" (see~\ref{sync.py}).
 
 The only way I can think of to solve this problem is to create a third
-kind of thread, which I can an usher.  The ushers manage {\tt queue1}
+kind of thread, which I can call an usher.  The ushers manage {\tt queue1}
 and the barbers manage {\tt queue2}.  If there are 4 ushers and 3 barbers,
 the sofa can be fully utilized.
 
@@ -3895,7 +3898,7 @@ santaSem.wait()
 mutex.wait()
     if reindeer >= 9:
         prepareSleigh()
-	reindeerSem.signal(9)
+        reindeerSem.signal(9)
         reindeer -= 9
     else if elves == 3:
         helpElves()
@@ -4185,14 +4188,14 @@ mutex.wait()
     hackers += 1
     if hackers == 4:
         hackerQueue.signal(4)                
-	hackers = 0
-	isCaptain = True
+        hackers = 0
+        isCaptain = True
     elif hackers == 2 and serfs >= 2:
         hackerQueue.signal(2)                
         serfQueue.signal(2)                  
-	serfs -= 2
-	hackers = 0
-	isCaptain = True
+        serfs -= 2
+        hackers = 0
+        isCaptain = True
     else:
         mutex.signal()      # captain keeps the mutex
 
@@ -4266,7 +4269,7 @@ allAshore = Semaphore(0)
 \end{lstlisting}
 
 {\tt mutex} protects {\tt passengers}, which counts the number of
-passengers that have invoked {\tt boardCar}.  
+passengers that have invoked {\tt board}.  
 
 Passengers wait on {\tt boardQueue} before boarding and
 {\tt unboardQueue} before unboarding.  {\tt allAboard}
@@ -4366,9 +4369,9 @@ signals the next car in line.
 
 \begin{lstlisting}[title={Multi-car Roller Coaster hint}]{}
 loadingArea = [Semaphore(0) for i in range(m)]
-loadingArea[1].signal()
+loadingArea[0].signal()
 unloadingArea = [Semaphore(0) for i in range(m)]
-unloadingArea[1].signal()
+unloadingArea[0].signal()
 \end{lstlisting}
 
 The function {\tt next} computes the identifier of the next
@@ -4568,7 +4571,7 @@ femaleSwitch.lock(empty)
     femaleMultiplex.wait()
         # bathroom code here
     femaleMultiplex.signal()
-female Switch.unlock(empty)
+femaleSwitch.unlock(empty)
 \end{lstlisting}
 
 The male code is similar.
@@ -4789,7 +4792,7 @@ consider the following cases:
 
 \item If the field is empty, the student lays claim for the heathens.
 
-\item If the heathens currently in charge, but the new arrival
+\item If the prudes currently in charge, but the new arrival
 has tipped the balance, he locks the prude turnstile and the
 system switches to transition mode.
 
@@ -4878,7 +4881,7 @@ must_wait = False
 {\tt eating} and {\tt waiting} keep track of the number of
 threads sitting at the bar and waiting.  {\tt mutex} protects
 both counters.  {\tt must\_wait} indicates that the bar is (or
-has been) full, som incoming customers have to block
+has been) full, some incoming customers have to block
 on {\tt block}.
 
 
@@ -4917,7 +4920,7 @@ Puzzle: what's wrong with this solution?
 
 
 \clearemptydoublepage
-\subsection {Sushi bar non-solution}
+\subsection {Sushi bar non-solution solution}
 
 The problem is at Line~\ref{sushi1}.  If a customer arrives
 while the bar is full, he has to give up the mutex while he
@@ -5324,18 +5327,18 @@ which is a bit more readable.
 mutex.wait()
     if students > 0 and students < 50:
         dean = 'waiting'
-	mutex.signal()
-	lieIn.wait()     # and get mutex from the student.
+        mutex.signal()
+        lieIn.wait()     # and get mutex from the student.
 
     # students must be 0 or >= 50     (*\label{roomparty1}*)
 
     if students >= 50:
         dean = 'in the room'
         breakup()
-	turn.wait()      # lock the turnstile
+        turn.wait()      # lock the turnstile
         mutex.signal()
-	clear.wait()     # and get mutex from the student.
-	turn.signal()    # unlock the turnstile
+        clear.wait()     # and get mutex from the student.
+        turn.signal()    # unlock the turnstile
 
     else:                # students must be 0
         search()
@@ -5567,7 +5570,7 @@ This problem was written by Grant Hutchins, who was inspired
 by a friend who took her
 Oath of Citizenship at Faneuil Hall in Boston.
 
-``There are three kinds of threads: immigrants, spectators, and a one
+``There are three kinds of threads: immigrants, spectators, and one
 judge.  Immigrants must wait in line, check in, and then sit down.  At
 some point, the judge enters the building.  When the judge is in the
 building, no one may enter, and the immigrants may not leave.
@@ -5605,8 +5608,10 @@ has executed {\tt confirm}.
 
 \begin{lstlisting}[title={Faneuil Hall problem hint}]{}
 noJudge = Semaphore(1)
+judge = 0
 entered = 0
 checked = 0
+allSignedIn = Semaphore(0)
 mutex = Semaphore(1)
 confirmed = Semaphore(0)
 \end{lstlisting}
@@ -5730,7 +5735,7 @@ in must leave before the judge can enter again.
 
 My solution uses the following additional variables:
 
-\begin{lstlisting}[title={Faneuil Hall problem hint}]{}
+\begin{lstlisting}[title={Extended Faneuil Hall problem hint}]{}
 exit = Semaphore(0)
 allGone = Semaphore(0)
 \end{lstlisting}
@@ -5749,7 +5754,7 @@ The top half of this solution is the same as before.  The
 difference starts at Line~\ref{fanexit}.  Immigrants wait
 here for the judge to leave.
 
-\begin{lstlisting}[title={Faneuil Hall problem solution (immigrant)}]{}
+\begin{lstlisting}[title={Extended Faneuil Hall problem solution (immigrant)}]{}
 noJudge.wait()
 enter()
 entered++
@@ -5793,7 +5798,7 @@ the nice feature that the judge releases both {\tt mutex}
 and {\tt noJudge} to end the phase cleanly.
 
 \newpage
-\begin{lstlisting}[title={Faneuil Hall problem solution (judge)}]{}
+\begin{lstlisting}[title={Extended Faneuil Hall problem solution (judge)}]{}
 noJudge.wait()
 mutex.wait()
 
@@ -5834,7 +5839,8 @@ The synchronization constraint that applies to students is that, in
 order to maintain the illusion of social suave, a student may never
 sit at a table alone.  A student is considered to be sitting alone
 if everyone else who has invoked {\tt dine} invokes {\tt leave}
-before she has finished {\tt dine}.
+before she has finished {\tt dine}. Of course, one can sit and
+start to eat at an initially empty table.
 
 Puzzle: write code that enforces this constraint.
 
@@ -5904,7 +5910,7 @@ else:
 leave()
 \end{lstlisting}
 
-When is student is checking in, if she sees one student
+When a student is checking in, if she sees one student
 eating and one waiting to leave, she lets the waiter off the
 hook and decrements {\tt readyToLeave} for him.
 
@@ -5974,7 +5980,7 @@ the situation and signals.
 
 I also used a per-thread variable named {\tt hasMutex} to help
 keep track of whether or not a thread holds the mutex.
-
+(There is no {\tt hasMutex} used in the solution!!!)
 
 \clearemptydoublepage
 \subsection {Extended Dining Hall problem solution}
@@ -6784,9 +6790,9 @@ my way by subclassing the version of Semaphore in the
 \begin{lstlisting}[title={Semaphore name change}]{}
 import threading
  
-class Semaphore(threading._Semaphore):
-    wait = threading._Semaphore.acquire
-    signal = threading._Semaphore.release
+class Semaphore(threading.Semaphore):
+    wait = threading.Semaphore.acquire
+    signal = threading.Semaphore.release
 \end{lstlisting}
 
 Once this class is defined, you can create and manipulate Semaphores
@@ -6808,7 +6814,7 @@ usual way requires keyword arguments and two steps:
 import threading
 
 def function(x, y, z):
-    print x, y, z
+    print(x, y, z)
 
 thread = threading.Thread(target=function, args=[1, 2, 3])
 thread.start()
