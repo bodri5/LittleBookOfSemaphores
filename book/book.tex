@@ -3389,7 +3389,11 @@ three sleeping smokers and a table.  One at a time, each pusher enters
 the room and checks the ingredients on the table.  If he can
 assemble a complete set of ingredients, he takes them off the table
 and wakes the corresponding smoker.  If not, he leaves his ingredient
-on the table and leaves without waking anyone.
+on the table and leaves without waking anyone. Of course because the
+pushers do not wait for the smokers, the corresponding smoker may not actually
+sleep but smoke his previous cigarette. The ingredients are set aside
+for him anyway.
+
 
 This is an example of a pattern we will see several times, which
 I call a {\bf scoreboard}.  The variables {\tt numPaper}, {\tt numTobacco}
