@@ -6092,7 +6092,7 @@ class Shared:
 def child_code(shared):
     while True:
         shared.counter += 1
-        print shared.counter
+        print(shared.counter)
         time.sleep(0.5)
 
 shared = Shared()
@@ -6144,7 +6144,7 @@ def child_code(shared):
 shared = Shared(10)
 children = [Thread(child_code, shared) for i in range(2)]
 for child in children: child.join()
-print shared.array
+print(shared.array)
 \end{lstlisting}
 
 In this example, {\tt shared} contains a list (misleadingly
@@ -6178,7 +6178,7 @@ class Histogram(dict):
         for item in seq:
             self[item] = self.get(item, 0) + 1
 
-print Histogram(shared.array)
+print(Histogram(shared.array))
 \end{lstlisting}
 
 Now when I run the program, I get
@@ -6208,6 +6208,14 @@ This example demonstrates one of the dangers of synchronization
 errors, which is that they may be rare, but they are not random.
 If an error occurs one time in a million, that doesn't mean it
 won't happen a million times in a row.
+
+(NOTICE TO THE AUTHOR: in this code the lack of synchronization not
+only may cause erroneous values, but also an application crash.
+The children check if {\tt shared.counter >= shared.end} and
+if not they update {\tt shared.array[shared.counter]}. However
+between the bound check and the update {\tt shared.counter}
+may have changed and this can cause an IndexError: list index out of range
+exception.)
 
 Puzzle: add synchronization code to this program to enforce
 exclusive access to the shared variables.  You can download the
@@ -6280,11 +6288,11 @@ class Shared:
 
 def consume(shared):
     shared.cokes -= 1
-    print shared.cokes
+    print(shared.cokes)
 
 def produce(shared):
     shared.cokes += 1
-    print shared.cokes
+    print(shared.cokes)
 
 def loop(shared, f, mu=1):
     while True:
@@ -6375,14 +6383,14 @@ trouble coming up with something at least as good as this:
 def consume(shared):
     shared.cokes.wait()
     shared.mutex.wait()
-    print shared.cokes.value()
+    print(shared.cokes._Semaphore__value)
     shared.mutex.signal()
     shared.slots.signal()
 
 def produce(shared):
     shared.slots.wait()
     shared.mutex.wait()
-    print shared.cokes._Semaphore__value
+    print(shared.cokes._Semaphore__value)
     shared.mutex.signal()
     shared.cokes.signal()
 \end{lstlisting}
